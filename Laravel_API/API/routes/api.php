@@ -14,4 +14,5 @@ Route::get('/rooms', [RoomController::class, 'index']);
 Route::get('/building', [BuildingController::class, 'index']);
 Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
 Route::delete('/building/{id}', [BuildingController::class, 'destroy']);
+Route::put('/rooms/{id}', 'RoomController@update');
 
