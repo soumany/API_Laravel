@@ -2,38 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Room;
+use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
     public function index()
     {
-        $rooms = Room::all();
-        return response()->json($rooms, 200);
+        return Room::all();
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'building_id' => 'required|exists:buildings,id',
             'name' => 'required|string|max:255',
             'capacity' => 'required|integer',
         ]);
 
-        $room = Room::create([
-            'name' => $validated['name'],
-            'capacity' => $validated['capacity'],
-        ]);
-
+        $room = Room::create($validated);
         return response()->json($room, 201);
     }
 
-    public function destroy($id)
+    public function show(Room $room)
     {
-        $room = Room::findOrFail($id);
-        $room->delete();
+        return $room;
+    }
 
-        return response()->json(['message' => 'Room deleted successfully'], 200);
+    public function update(Request $request, Room $room)
+    {
+        $validated = $request->validate([
+            'building_id' => 'sometimes|exists:buildings,id',
+            'name' => 'sometimes|string|max:255',
+            'capacity' => 'sometimes|integer',
+        ]);
+
+        $room->update($validated);
+        return response()->json($room, 200);
+    }
+
+    public function destroy(Room $room)
+    {
+        $room->delete();
+        return response()->json(null, 204);
     }
 }
 
