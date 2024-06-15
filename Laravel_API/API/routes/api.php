@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CombinedDataController;
 
 // Define API routes for the UserController
 Route::resource('users', UserController::class);
@@ -19,4 +20,5 @@ Route::put('/rooms/{id}', 'RoomController@update');
 
 Route::apiResource('homes', HomeController::class);
 Route::apiResource('floors', FloorController::class);
+Route::get('/combined-data', [CombinedDataController::class, 'fetchData']);
 
