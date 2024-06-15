@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Notifications\rentroom;
 //for otp
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Notification;
+use Laravel\Socialite\Facades\Socialite;
+use Nexmo\Laravel\Facade\Nexmo;
 
 class UserController extends Controller
 {
@@ -26,6 +30,9 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'phone' => 'required',
+     
+
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -35,6 +42,7 @@ class UserController extends Controller
         $user->name = $request->input('name');
         $user->email = $request->input('email');
         $user->password = bcrypt($request->input('password'));
+        $user->phone=$request->input('phone');
         $user->save();
 
         $otp = rand(100000, 999999);
@@ -42,9 +50,7 @@ class UserController extends Controller
         $user->otp_expires_at = Carbon::now()->addMinutes(10);
         $user->save();
         // Send OTP email
-        Mail::raw("Your OTP code is: $otp", function ($message) use ($user) {
-            $message->to($user->email)->subject('Your OTP Code');
-        });
+        Notification::send($user, new rentroom($otp));
         return response()->json($user, 201);
     }
 
@@ -119,4 +125,48 @@ class UserController extends Controller
 
         return response()->json(null, 204);
     }
+
+    //===========================OTP========================
+    /**
+     * Send OTP via SMS using Vonage (Nexmo).
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendOtpViaSms(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $user = User::where('phone', $request->input('phone'))->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $otp = rand(100000, 999999);
+        $user->otp = $otp;
+        $user->otp_expires_at = Carbon::now()->addMinutes(10);
+        $user->save();
+
+        // Send OTP via Vonage SMS
+        try {
+            Notification::message()->send([
+                'to' => $request->input('phone'),
+                'from' => env('VONAGE_BRAND_NAME'), // Assuming you've set this in your .env file
+                'text' => "Your OTP code is: $otp"
+            ]);
+
+            return response()->json(['message' => 'OTP sent successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to send OTP', 'details' => $e->getMessage()], 500);
+        }
+    }
+
+    // Other methods like verifyOtp, update, delete, etc. remain unchanged or as per your requirements.
 }

@@ -10,3 +10,4 @@ Route::resource('users', UserController::class);
 Route::post('/rooms', [RoomController::class, 'store']);
 Route::get('/rooms', [RoomController::class, 'index']);
 Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
+Route::post('/send-otp-sms', [UserController::class, 'store']);
