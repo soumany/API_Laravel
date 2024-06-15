@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Building extends Model
+class Home extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'address'];
+    protected $fillable = ['home_location', 'owner'];
 
-    public function rooms()
+    public function floors()
     {
-        return $this->hasMany(Room::class);
+        return $this->hasMany(Floor::class);
     }
 }
