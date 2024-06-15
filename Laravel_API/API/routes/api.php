@@ -15,10 +15,10 @@ Route::post('/rooms', [RoomController::class, 'store']);
 Route::get('/rooms', [RoomController::class, 'index']);
 // Route::get('/floors', [FloorController::class, 'index']);
 Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
+
 // Route::delete('/floors/{id}', [FloorController::class, 'destroy']);
 Route::put('/rooms/{id}', 'RoomController@update');
 
 Route::apiResource('homes', HomeController::class);
 Route::apiResource('floors', FloorController::class);
 Route::get('/combined-data', [CombinedDataController::class, 'fetchData']);
-

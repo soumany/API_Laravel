@@ -14,6 +14,15 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    // 'providers' => [
+    //     // Other providers...
+    //     Nexmo\Laravel\NexmoServiceProvider::class,
+    // ],
+
+    // 'aliases' => [
+    //     // Other aliases...
+    //     'Nexmo' => Nexmo\Laravel\Facade\Nexmo::class,
+    // ],
 
     /*
     |--------------------------------------------------------------------------
@@ -104,6 +113,7 @@ return [
             explode(',', env('APP_PREVIOUS_KEYS', ''))
         ),
     ],
+
 
     /*
     |--------------------------------------------------------------------------
