@@ -27,22 +27,20 @@ class UserController extends Controller
     {
         // Validation
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'phone' => 'required',
-     
-
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
         // Create a new user
         $user = new User;
-        $user->name = $request->input('name');
+        $user->name = $request->input('firstname');
+        $user->name = $request->input('lastname');
         $user->email = $request->input('email');
         $user->password = bcrypt($request->input('password'));
-        $user->phone=$request->input('phone');
         $user->save();
 
         $otp = rand(100000, 999999);
@@ -58,31 +56,11 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
-            'otp' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
-
-        $user = User::where('email', $request->input('email'))->first();
-
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
-
-        if ($user->otp !== $request->input('otp')) {
-            return response()->json(['error' => 'Invalid OTP'], 400);
-        }
-
-        if (Carbon::now()->greaterThan($user->otp_expires_at)) {
-            return response()->json(['error' => 'OTP has expired'], 400);
-        }
-
-        // Clear OTP after verification
-        $user->otp = null;
-        $user->otp_expires_at = null;
-        $user->save();
 
         return response()->json(['message' => 'OTP verified successfully'], 200);
     }
@@ -133,40 +111,39 @@ class UserController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sendOtpViaSms(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'phone' => 'required|string',
-        ]);
+    // public function sendOtpViaSms(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'phone' => 'required|string',
+    //     ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 400);
+    //     }
 
-        $user = User::where('phone', $request->input('phone'))->first();
+    //     $user = User::where('phone', $request->input('phone'))->first();
 
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
+    //     if (!$user) {
+    //         return response()->json(['error' => 'User not found'], 404);
+    //     }
 
-        $otp = rand(100000, 999999);
-        $user->otp = $otp;
-        $user->otp_expires_at = Carbon::now()->addMinutes(10);
-        $user->save();
+    //     $otp = rand(100000, 999999);
+    //     $user->otp = $otp;
+    //     $user->save();
 
-        // Send OTP via Vonage SMS
-        try {
-            Notification::message()->send([
-                'to' => $request->input('phone'),
-                'from' => env('VONAGE_BRAND_NAME'), // Assuming you've set this in your .env file
-                'text' => "Your OTP code is: $otp"
-            ]);
+    //     // Send OTP via Vonage SMS
+    //     try {
+    //         Notification::message()->send([
+    //             'to' => $request->input('phone'),
+    //             'from' => env('VONAGE_BRAND_NAME'), // Assuming you've set this in your .env file
+    //             'text' => "Your OTP code is: $otp"
+    //         ]);
 
-            return response()->json(['message' => 'OTP sent successfully']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to send OTP', 'details' => $e->getMessage()], 500);
-        }
-    }
+    //         return response()->json(['message' => 'OTP sent successfully']);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => 'Failed to send OTP', 'details' => $e->getMessage()], 500);
+    //     }
+    // }
 
     // Other methods like verifyOtp, update, delete, etc. remain unchanged or as per your requirements.
 }
