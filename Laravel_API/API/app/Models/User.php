@@ -19,8 +19,13 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
-        'otp'
+        'otp',
+        //add social
+        'facebook_id',
+        'facebook_token',
+        'avatar',
     ];
 
     /**

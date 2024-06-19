@@ -22,3 +22,7 @@ Route::put('/rooms/{id}', 'RoomController@update');
 Route::apiResource('homes', HomeController::class);
 Route::apiResource('floors', FloorController::class);
 Route::get('/combined-data', [CombinedDataController::class, 'fetchData']);
+
+//fb
+Route::get('/auth/facebook', 'Auth\LoginController@redirectToFacebook');
+Route::get('/auth/facebook/callback', 'Auth\LoginController@handleFacebookCallback');
